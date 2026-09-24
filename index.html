@@ -426,54 +426,82 @@
     box-shadow: 0 0 20px var(--accent-glow);
   }
 
-  /* ПАКЕТЫ */
-  .package-card {
+  /* ГОТОВЫЕ ШАБЛОНЫ */
+  .template-card {
     background: var(--bg);
-    border: 1px solid var(--accent);
+    border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 12px;
-    position: relative;
     overflow: hidden;
-    transition: all 0.4s;
+    margin-bottom: 14px;
+    transition: all 0.25s ease;
   }
-  .package-card::before {
-    content: 'ВЫГОДНО';
-    position: absolute;
-    top: 12px; right: -30px;
-    background: var(--accent);
-    color: #050807;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 3px 30px;
-    transform: rotate(35deg);
-    letter-spacing: 1px;
+  .template-card:active {
+    border-color: var(--accent);
+    box-shadow: 0 0 25px var(--accent-glow2);
   }
-  .package-card h3 {
+  .template-img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+  .template-body {
+    padding: 16px;
+  }
+  .template-body h3 {
     font-size: 16px;
     color: #fff;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
+    margin-bottom: 4px;
   }
-  .package-card .pkg-desc {
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.55;
+  .template-body .tpl-for {
+    font-size: 12px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
     margin-bottom: 10px;
   }
-  .package-card .pkg-price {
+  .template-body ul {
+    list-style: none;
+    margin-bottom: 12px;
+  }
+  .template-body ul li {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    padding-left: 18px;
+    position: relative;
+  }
+  .template-body ul li::before {
+    content: '•';
+    color: var(--accent);
+    position: absolute;
+    left: 4px;
+    font-weight: 900;
+    font-size: 16px;
+    transition: color 0.4s;
+  }
+  .template-price {
     font-size: 18px;
     color: var(--accent);
     font-weight: 900;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     transition: color 0.4s;
   }
-  .package-card .pkg-old {
+  .tpl-note {
+    margin-top: 8px;
+    padding: 16px;
+    text-align: center;
+    background: var(--bg2);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
     font-size: 13px;
-    color: var(--text3);
-    text-decoration: line-through;
-    margin-left: 8px;
-    font-weight: 400;
+    color: var(--text2);
+    line-height: 1.6;
+    transition: all 0.4s;
+  }
+  .tpl-note strong {
+    color: var(--accent);
+    transition: color 0.4s;
   }
 
   /* ПОРТФОЛИО */
@@ -653,9 +681,9 @@
     <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="9" cy="13" r="1.5"/><circle cx="15" cy="13" r="1.5"/><path d="M8 17h8"/></svg>
     Услуги
   </div>
-  <div class="sidebar-item" data-page="packages" onclick="showPage('packages')">
+  <div class="sidebar-item" data-page="templates" onclick="showPage('templates')">
     <svg class="ico" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-    Пакеты
+    Готовые шаблоны
   </div>
   <div class="sidebar-item" data-page="portfolio" onclick="showPage('portfolio')">
     <svg class="ico" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -805,37 +833,112 @@
     </div>
   </div>
 
-  <!-- ПАКЕТЫ -->
-  <div class="page" id="page-packages">
+  <!-- ГОТОВЫЕ ШАБЛОНЫ -->
+  <div class="page" id="page-templates">
     <div class="section">
-      <h2>Пакетные предложения</h2>
+      <h2>Готовые шаблоны</h2>
 
-      <div class="package-card">
-        <h3>🚀 Стартовый</h3>
-        <div class="pkg-desc">Discord-бот (модерация + логи) + сайт-визитка. Идеально для старта.</div>
-        <div class="pkg-price">4 500 ₽ <span class="pkg-old">5 500 ₽</span></div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20заказать%20пакет%20Стартовый" target="_blank">Заказать пакет</a>
+      <div class="template-card">
+        <img class="template-img tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dmod-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dmod-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dmod-g.png" alt="Discord Moderation Bot">
+        <div class="template-body">
+          <h3>Discord — Модерация</h3>
+          <div class="tpl-for">Для игровых серверов и семей</div>
+          <ul>
+            <li>Баны, муты, кики</li>
+            <li>Простые логи действий</li>
+            <li>Авто-роли для новичков</li>
+            <li>Антиспам</li>
+          </ul>
+          <div class="template-price">2 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Discord-Модерация" target="_blank">Заказать</a>
+        </div>
       </div>
 
-      <div class="package-card">
-        <h3>💼 Бизнес</h3>
-        <div class="pkg-desc">Discord-бот (полный: модерация, заявки, жалобы) + сайт-портфолио. Экономия 20%.</div>
-        <div class="pkg-price">6 500 ₽ <span class="pkg-old">8 000 ₽</span></div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20заказать%20пакет%20Бизнес" target="_blank">Заказать пакет</a>
+      <div class="template-card">
+        <img class="template-img tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tshop-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tshop-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tshop-g.png" alt="Telegram Shop Bot">
+        <div class="template-body">
+          <h3>Telegram — Магазин</h3>
+          <div class="tpl-for">Для инста-магазинов и продавцов</div>
+          <ul>
+            <li>Каталог товаров с фото</li>
+            <li>Корзина и оформление заказа</li>
+            <li>Уведомление тебе о заказе</li>
+            <li>Ответ клиенту «заказ принят»</li>
+          </ul>
+          <div class="template-price">3 000 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Магазин" target="_blank">Заказать</a>
+        </div>
       </div>
 
-      <div class="package-card">
-        <h3>👑 Премиум</h3>
-        <div class="pkg-desc">Discord-бот + Telegram-бот + сайт. Полный комплект под ключ. Экономия 25%.</div>
-        <div class="pkg-price">9 000 ₽ <span class="pkg-old">12 000 ₽</span></div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20заказать%20пакет%20Премиум" target="_blank">Заказать пакет</a>
+      <div class="template-card">
+        <img class="template-img tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tbook-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tbook-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tbook-g.png" alt="Telegram Booking Bot">
+        <div class="template-body">
+          <h3>Telegram — Запись</h3>
+          <div class="tpl-for">Для барбершопов и салонов</div>
+          <ul>
+            <li>Выбор услуги и мастера</li>
+            <li>Запись на дату и время</li>
+            <li>Напоминание клиенту</li>
+            <li>База клиентов</li>
+          </ul>
+          <div class="template-price">2 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Запись" target="_blank">Заказать</a>
+        </div>
       </div>
 
-      <div class="package-card">
-        <h3>📱 Мобильный</h3>
-        <div class="pkg-desc">Android-приложение под ваш бизнес: запись, каталог, заказы + публикация в RuStore + поддержка 1 месяц.</div>
-        <div class="pkg-price">12 000 ₽ <span class="pkg-old">15 000 ₽</span></div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20заказать%20пакет%20Мобильный" target="_blank">Заказать пакет</a>
+      <div class="template-card">
+        <img class="template-img tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tdeliv-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tdeliv-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tdeliv-g.png" alt="Telegram Delivery Bot">
+        <div class="template-body">
+          <h3>Telegram — Доставка</h3>
+          <div class="tpl-for">Для кафе, кухонь, доставки</div>
+          <ul>
+            <li>Меню с ценами</li>
+            <li>Оформление заказа</li>
+            <li>Статус заказа</li>
+            <li>Уведомления тебе</li>
+          </ul>
+          <div class="template-price">3 000 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Доставка" target="_blank">Заказать</a>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <img class="template-img tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tform-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tform-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tform-g.png" alt="Telegram Forms Bot">
+        <div class="template-body">
+          <h3>Telegram — Заявки</h3>
+          <div class="tpl-for">Для школ, курсов, репетиторов</div>
+          <ul>
+            <li>Форма заявки (имя, телефон, вопрос)</li>
+            <li>Отправка тебе в ЛС</li>
+            <li>Ответ клиенту «принято»</li>
+            <li>Простая смена текстов</li>
+          </ul>
+          <div class="template-price">1 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Заявки" target="_blank">Заказать</a>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <img class="template-img tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dfam-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dfam-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dfam-g.png" alt="Discord Family Bot">
+        <div class="template-body">
+          <h3>Discord — Семья</h3>
+          <div class="tpl-for">Для кланов, семей, сообществ</div>
+          <ul>
+            <li>Заявки в семью</li>
+            <li>Жалобы на участников</li>
+            <li>Логи модерации</li>
+            <li>Авто-роли</li>
+            <li>Антиспам</li>
+            <li>Антирейд</li>
+          </ul>
+          <div class="template-price">3 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Discord-Семья" target="_blank">Заказать</a>
+        </div>
+      </div>
+
+      <div class="tpl-note">
+        💬 Нужен проект с уникальной логикой или чем-то особенным?<br>
+        <strong>Напиши — рассчитаю индивидуально.</strong>
       </div>
 
     </div>
@@ -992,6 +1095,13 @@
     }
   }
 
+  function updateTemplateImages() {
+    const isRed = document.body.classList.contains('theme-red');
+    document.querySelectorAll('.tpl-img').forEach(img => {
+      img.src = isRed ? img.dataset.r : img.dataset.g;
+    });
+  }
+
   function toggleTheme() {
     document.body.classList.toggle('theme-red');
     const isRed = document.body.classList.contains('theme-red');
@@ -1006,6 +1116,7 @@
       ? 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-red.png'
       : 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-green.png';
 
+    updateTemplateImages();
     localStorage.setItem('theme', isRed ? 'red' : 'green');
   }
 
@@ -1014,6 +1125,7 @@
       document.body.classList.add('theme-red');
       document.getElementById('bannerImg').src = 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/banner-red.png';
       document.getElementById('favicon').href = 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-red.png';
+      updateTemplateImages();
     }
   });
 </script>
