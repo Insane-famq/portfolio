@@ -67,7 +67,9 @@
     display: flex; align-items: center; justify-content: center;
     color: #050807; font-weight: 900; font-size: 14px; cursor: pointer;
     border: 2px solid var(--accent-glow); transition: all 0.25s;
+    overflow: hidden; background-size: cover; background-position: center;
   }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .user-avatar:active { transform: scale(0.95); }
   .theme-switch {
     width: 44px; height: 26px; background: var(--bg2);
@@ -96,7 +98,7 @@
     position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
     border-radius: 50%; background: var(--bg); border: 1px solid var(--border);
     color: var(--text2); font-size: 18px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center; z-index: 10;
   }
   .modal-close:active { background: var(--accent-glow2); }
   .modal h2 {
@@ -126,6 +128,10 @@
   }
   .form-submit:active { transform: scale(0.97); box-shadow: 0 0 25px var(--accent-glow); }
   .form-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .form-submit.secondary {
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border);
+  }
   .modal-switch {
     text-align: center; margin-top: 15px; font-size: 12px; color: var(--text2);
   }
@@ -145,17 +151,58 @@
     font-size: 12px; margin-bottom: 15px; display: none;
   }
   .modal-success.active { display: block; }
-  /* Звёзды */
   .stars-input {
     display: flex; gap: 8px; justify-content: center;
     margin: 15px 0; font-size: 36px; cursor: pointer;
   }
   .stars-input span {
-    color: var(--text3); transition: all 0.2s;
-    user-select: none;
+    color: var(--text3); transition: all 0.2s; user-select: none;
   }
   .stars-input span:hover,
   .stars-input span.active { color: var(--accent); transform: scale(1.1); }
+  /* Профиль */
+  .profile-avatar-big {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--accent); margin: 0 auto 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; font-weight: 900; color: #050807;
+    overflow: hidden; cursor: pointer; position: relative;
+    border: 3px solid var(--accent-glow);
+  }
+  .profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-avatar-big::after {
+    content: '📷'; position: absolute; bottom: 0; right: 0;
+    background: var(--accent); width: 30px; height: 30px;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 14px;
+  }
+  .admin-menu-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 10px; cursor: pointer;
+    transition: all 0.25s;
+  }
+  .admin-menu-item:active {
+    border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow2);
+  }
+  .admin-menu-item .label { color: #fff; font-size: 14px; font-weight: 600; }
+  .admin-menu-item .arrow { color: var(--accent); font-size: 18px; }
+  .admin-review {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  }
+  .admin-review .stars { color: var(--accent); margin-bottom: 6px; }
+  .admin-review .text { color: var(--text2); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+  .admin-review .meta { color: var(--text3); font-size: 11px; margin-bottom: 10px; }
+  .admin-review .actions { display: flex; gap: 8px; }
+  .admin-review button {
+    flex: 1; padding: 8px; border: none; border-radius: 6px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    text-transform: uppercase;
+  }
+  .btn-approve { background: var(--accent); color: #050807; }
+  .btn-reject { background: #ff3b3b; color: #fff; }
+  .btn-delete { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
   .sidebar {
     position: fixed; top: 60px; left: 0; bottom: 0; width: 280px;
     background: rgba(10, 15, 13, 0.98); backdrop-filter: blur(20px);
@@ -440,6 +487,30 @@
   </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО — ПРОФИЛЬ -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProfile()">×</button>
+    <h2>Профиль</h2>
+    <div class="modal-error" id="profileError"></div>
+    <div class="modal-success" id="profileSuccess"></div>
+
+    <div class="profile-avatar-big" id="profileAvatarBig" onclick="document.getElementById('avatarInput').click()">
+      <span id="profileAvatarLetter">U</span>
+    </div>
+    <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="uploadAvatar(event)" />
+    <p style="text-align: center; color: var(--text3); font-size: 11px; margin-bottom: 15px;">Нажми на аватар, чтобы загрузить фото</p>
+
+    <div class="form-group">
+      <label>Никнейм</label>
+      <input type="text" id="profileUsername" placeholder="Твой ник" />
+    </div>
+
+    <button class="form-submit" onclick="saveUsername()">💾 Сохранить ник</button>
+    <button class="form-submit secondary" style="margin-top: 10px;" onclick="logout()">🚪 Выйти</button>
+  </div>
+</div>
+
 <!-- МОДАЛЬНОЕ ОКНО — НАПИСАТЬ ОТЗЫВ -->
 <div class="modal-overlay" id="reviewModal">
   <div class="modal">
@@ -501,6 +572,10 @@
   <div class="sidebar-item" data-page="faq" onclick="showPage('faq')">
     <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     FAQ
+  </div>
+  <div class="sidebar-item" data-page="admin" id="adminMenuItem" onclick="showPage('admin')" style="display: none;">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5 2 7L12 16l-6.5 4.5 2-7L2 9h7z"/></svg>
+    👑 Админ-панель
   </div>
   <div class="sidebar-divider"></div>
   <div class="sidebar-contacts">
@@ -779,6 +854,30 @@
     </div>
   </div>
 
+  <!-- АДМИН-ПАНЕЛЬ -->
+  <div class="page" id="page-admin">
+    <div class="section">
+      <h2>👑 Админ-панель</h2>
+
+      <div class="admin-menu-item" onclick="showAdminSection('reviews')">
+        <span class="label">⭐ Модерация отзывов</span>
+        <span class="arrow">→</span>
+      </div>
+
+      <div class="admin-menu-item" onclick="showAdminSection('users')">
+        <span class="label">👥 Пользователи</span>
+        <span class="arrow">→</span>
+      </div>
+
+      <div class="admin-menu-item" onclick="showAdminSection('prices')">
+        <span class="label">💰 Цены и тексты</span>
+        <span class="arrow">→</span>
+      </div>
+
+      <div id="adminContent"></div>
+    </div>
+  </div>
+
   <!-- FAQ -->
   <div class="page" id="page-faq">
     <div class="section">
@@ -814,6 +913,7 @@
 <script src="supabase-config.js"></script>
 <script>
   let currentUser = null;
+  let currentProfile = null;
   let selectedStars = 0;
 
   function toggleMenu() {
@@ -838,6 +938,7 @@
       }, 200);
     }
     if (page === 'reviews') loadReviews();
+    if (page === 'admin') loadAdminReviews();
   }
 
   function updateTemplateImages() {
@@ -959,24 +1060,150 @@
     }
   }
 
-  function updateAuthUI(user) {
+  async function updateAuthUI(user) {
     currentUser = user;
     const authBtn = document.getElementById('authBtn');
     const avatar = document.getElementById('userAvatar');
+    const adminItem = document.getElementById('adminMenuItem');
+
     if (user) {
       authBtn.style.display = 'none';
       avatar.style.display = 'flex';
-      const name = user.user_metadata?.username || user.email || 'U';
-      avatar.textContent = name[0].toUpperCase();
+
+      // Загружаем профиль
+      const { data } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      currentProfile = data;
+
+      const name = data?.username || user.user_metadata?.username || user.email || 'U';
+      if (data?.avatar_url) {
+        avatar.innerHTML = `<img src="${data.avatar_url}" alt="${name}">`;
+      } else {
+        avatar.innerHTML = '';
+        avatar.textContent = name[0].toUpperCase();
+      }
       avatar.title = name;
+
+      // Показываем админку если админ
+      if (data?.is_admin) {
+        adminItem.style.display = 'flex';
+      } else {
+        adminItem.style.display = 'none';
+      }
     } else {
       authBtn.style.display = 'block';
       avatar.style.display = 'none';
+      adminItem.style.display = 'none';
+      currentProfile = null;
     }
   }
 
+  // ============ ПРОФИЛЬ ============
   function openProfile() {
-    alert('Профиль: ' + (currentUser?.user_metadata?.username || currentUser?.email || 'Гость'));
+    if (!currentUser) return;
+    document.getElementById('profileModal').classList.add('active');
+    document.getElementById('profileError').classList.remove('active');
+    document.getElementById('profileSuccess').classList.remove('active');
+
+    const name = currentProfile?.username || 'U';
+    document.getElementById('profileUsername').value = name;
+
+    const avatarBig = document.getElementById('profileAvatarBig');
+    const letter = document.getElementById('profileAvatarLetter');
+
+    if (currentProfile?.avatar_url) {
+      avatarBig.innerHTML = `<img src="${currentProfile.avatar_url}" alt="${name}">`;
+    } else {
+      avatarBig.innerHTML = `<span id="profileAvatarLetter">${name[0].toUpperCase()}</span>`;
+    }
+  }
+
+  function closeProfile() {
+    document.getElementById('profileModal').classList.remove('active');
+  }
+
+  async function uploadAvatar(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const errorEl = document.getElementById('profileError');
+    const successEl = document.getElementById('profileSuccess');
+    errorEl.classList.remove('active');
+    successEl.classList.remove('active');
+
+    try {
+      if (file.size > 2 * 1024 * 1024) throw new Error('Файл не больше 2 МБ');
+
+      const ext = file.name.split('.').pop();
+      const fileName = `${currentUser.id}_${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabaseClient.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      const avatarUrl = urlData.publicUrl;
+
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', currentUser.id);
+
+      if (updateError) throw updateError;
+
+      currentProfile.avatar_url = avatarUrl;
+      await updateAuthUI(currentUser);
+      openProfile();
+
+      successEl.textContent = '✅ Аватар обновлён!';
+      successEl.classList.add('active');
+    } catch (err) {
+      errorEl.textContent = '❌ ' + err.message;
+      errorEl.classList.add('active');
+    }
+  }
+
+  async function saveUsername() {
+    const newName = document.getElementById('profileUsername').value.trim();
+    const errorEl = document.getElementById('profileError');
+    const successEl = document.getElementById('profileSuccess');
+    errorEl.classList.remove('active');
+    successEl.classList.remove('active');
+
+    try {
+      if (!newName || newName.length < 3) throw new Error('Ник минимум 3 символа');
+
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ username: newName })
+        .eq('id', currentUser.id);
+
+      if (error) throw error;
+
+      currentProfile.username = newName;
+      await updateAuthUI(currentUser);
+
+      successEl.textContent = '✅ Ник обновлён!';
+      successEl.classList.add('active');
+    } catch (err) {
+      errorEl.textContent = '❌ ' + err.message;
+      errorEl.classList.add('active');
+    }
+  }
+
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    closeProfile();
+    updateAuthUI(null);
   }
 
   // ============ ОТЗЫВЫ ============
@@ -998,7 +1225,6 @@
     document.getElementById('reviewModal').classList.remove('active');
   }
 
-  // Клик по звёздам
   document.querySelectorAll('#starsInput span').forEach(star => {
     star.addEventListener('click', () => {
       selectedStars = parseInt(star.dataset.star);
@@ -1020,7 +1246,7 @@
       if (selectedStars < 1) throw new Error('Поставь оценку');
       if (!text || text.length < 5) throw new Error('Напиши отзыв (мин. 5 символов)');
 
-      const username = currentUser.user_metadata?.username || currentUser.email;
+      const username = currentProfile?.username || currentUser.email;
 
       const { error } = await supabaseClient.from('reviews').insert({
         user_id: currentUser.id,
@@ -1035,9 +1261,7 @@
       successEl.textContent = '✅ Отзыв отправлен на модерацию!';
       successEl.classList.add('active');
 
-      setTimeout(() => {
-        closeReviewModal();
-      }, 2000);
+      setTimeout(() => closeReviewModal(), 2000);
     } catch (err) {
       errorEl.textContent = '❌ ' + err.message;
       errorEl.classList.add('active');
@@ -1070,6 +1294,69 @@
     }
   }
 
+  // ============ АДМИН-ПАНЕЛЬ ============
+  async function loadAdminReviews() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = '';
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        content.innerHTML = '<p style="color: var(--text2); font-size: 14px;">Отзывов нет.</p>';
+        return;
+      }
+
+      content.innerHTML = '<h3 style="color: #fff; margin: 20px 0 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Все отзывы</h3>' +
+        data.map(r => `
+          <div class="admin-review">
+            <div class="stars">${'⭐'.repeat(r.stars)}</div>
+            <div class="text">«${r.text}»</div>
+            <div class="meta">— ${r.username} • Статус: <b>${r.status}</b></div>
+            <div class="actions">
+              ${r.status !== 'approved' ? `<button class="btn-approve" onclick="adminApprove('${r.id}')">✅ Одобрить</button>` : ''}
+              ${r.status !== 'rejected' ? `<button class="btn-reject" onclick="adminReject('${r.id}')">❌ Отклонить</button>` : ''}
+              <button class="btn-delete" onclick="adminDelete('${r.id}')">🗑️ Удалить</button>
+            </div>
+          </div>
+        `).join('');
+    } catch (err) {
+      content.innerHTML = '<p style="color: #ff6b6b;">Ошибка загрузки</p>';
+    }
+  }
+
+  async function adminApprove(id) {
+    await supabaseClient.from('reviews').update({ status: 'approved' }).eq('id', id);
+    loadAdminReviews();
+  }
+
+  async function adminReject(id) {
+    await supabaseClient.from('reviews').update({ status: 'rejected' }).eq('id', id);
+    loadAdminReviews();
+  }
+
+  async function adminDelete(id) {
+    if (!confirm('Удалить отзыв?')) return;
+    await supabaseClient.from('reviews').delete().eq('id', id);
+    loadAdminReviews();
+  }
+
+  function showAdminSection(section) {
+    const content = document.getElementById('adminContent');
+    if (section === 'reviews') loadAdminReviews();
+    if (section === 'users') {
+      content.innerHTML = '<p style="color: var(--text2); margin-top: 20px;">Раздел в разработке...</p>';
+    }
+    if (section === 'prices') {
+      content.innerHTML = '<p style="color: var(--text2); margin-top: 20px;">Раздел в разработке...</p>';
+    }
+  }
+
   // ============ ИНИЦИАЛИЗАЦИЯ ============
   window.addEventListener('DOMContentLoaded', async () => {
     if (localStorage.getItem('theme') === 'red') {
@@ -1079,9 +1366,9 @@
       updateTemplateImages();
     }
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session?.user) updateAuthUI(session.user);
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      updateAuthUI(session?.user || null);
+    if (session?.user) await updateAuthUI(session.user);
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      await updateAuthUI(session?.user || null);
     });
   });
 </script>
