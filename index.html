@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MARIO — Разработчик ботов и сайтов</title>
 <link id="favicon" rel="icon" type="image/png" href="https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-green.png">
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -100,8 +104,49 @@
     transition: all 0.4s;
   }
 
-  .theme-switch {
+  .topbar-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .auth-btn {
+    background: var(--accent);
+    color: #050807;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .auth-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #050807;
+    font-weight: 900;
+    font-size: 14px;
+    cursor: pointer;
+    border: 2px solid var(--accent-glow);
+    transition: all 0.25s;
+  }
+  .user-avatar:active { transform: scale(0.95); }
+
+  .theme-switch {
     width: 44px; height: 26px;
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -122,6 +167,141 @@
     box-shadow: 0 0 10px var(--accent-glow);
   }
   body.theme-red .theme-switch::before { left: calc(100% - 22px); }
+
+  /* МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px 25px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 0 60px var(--accent-glow2);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 15px; right: 15px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:active { background: var(--accent-glow2); }
+
+  .modal h2 {
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: #fff;
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.25s;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow2);
+  }
+
+  .form-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #050807;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.25s;
+  }
+  .form-submit:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 25px var(--accent-glow);
+  }
+
+  .modal-switch {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .modal-switch span {
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .modal-error {
+    background: rgba(255, 59, 59, 0.15);
+    border: 1px solid rgba(255, 59, 59, 0.4);
+    color: #ff6b6b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    margin-bottom: 15px;
+    display: none;
+  }
+  .modal-error.active { display: block; }
+
+  .modal-success {
+    background: rgba(0, 230, 118, 0.15);
+    border: 1px solid rgba(0, 230, 118, 0.4);
+    color: #00e676;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    margin-bottom: 15px;
+    display: none;
+  }
+  .modal-success.active { display: block; }
 
   /* БОКОВОЕ МЕНЮ */
   .sidebar {
@@ -640,7 +820,44 @@
     <span></span>
   </div>
   <div class="brand">MARIO</div>
-  <div class="theme-switch" onclick="toggleTheme()"></div>
+
+  <div class="topbar-right">
+    <button class="auth-btn" id="authBtn" onclick="openAuthModal()">Войти</button>
+    <div class="user-avatar" id="userAvatar" style="display: none;" onclick="openProfile()"></div>
+    <div class="theme-switch" onclick="toggleTheme()"></div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuthModal()">×</button>
+    <h2 id="modalTitle">Регистрация</h2>
+
+    <div class="modal-error" id="modalError"></div>
+    <div class="modal-success" id="modalSuccess"></div>
+
+    <div class="form-group">
+      <label>Логин</label>
+      <input type="text" id="authUsername" placeholder="Введи логин" />
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="Введи email" />
+    </div>
+
+    <div class="form-group">
+      <label>Пароль</label>
+      <input type="password" id="authPassword" placeholder="Введи пароль" />
+    </div>
+
+    <button class="form-submit" id="authSubmit" onclick="handleAuth()">Создать аккаунт</button>
+
+    <div class="modal-switch">
+      <span id="modalSwitchText">Уже есть аккаунт? Войти</span>
+    </div>
+  </div>
 </div>
 
 <!-- БОКОВОЕ МЕНЮ -->
@@ -668,6 +885,10 @@
   <div class="sidebar-item" data-page="process" onclick="showPage('process')">
     <svg class="ico" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     Процесс
+  </div>
+  <div class="sidebar-item" data-page="reviews" onclick="showPage('reviews')">
+    <svg class="ico" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Отзывы
   </div>
   <div class="sidebar-item" data-page="faq" onclick="showPage('faq')">
     <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -908,6 +1129,16 @@
     </div>
   </div>
 
+  <!-- ОТЗЫВЫ -->
+  <div class="page" id="page-reviews">
+    <div class="section">
+      <h2>Отзывы</h2>
+      <div id="reviewsList">
+        <p style="color: var(--text2); font-size: 14px;">Загрузка отзывов...</p>
+      </div>
+    </div>
+  </div>
+
   <!-- FAQ -->
   <div class="page" id="page-faq">
     <div class="section">
@@ -940,7 +1171,11 @@
 
 </div>
 
+<!-- SUPABASE CONFIG -->
+<script src="supabase-config.js"></script>
+
 <script>
+  // ============ МЕНЮ ============
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('burger').classList.toggle('open');
@@ -963,31 +1198,190 @@
         });
       }, 200);
     }
+
+    if (page === 'reviews') {
+      loadReviews();
+    }
   }
 
+  // ============ ТЕМА ============
   function toggleTheme() {
     document.body.classList.toggle('theme-red');
     const isRed = document.body.classList.contains('theme-red');
-
     const banner = document.getElementById('bannerImg');
     banner.src = isRed
       ? 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/banner-red.png'
       : 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/banner.png';
-
     const favicon = document.getElementById('favicon');
     favicon.href = isRed
       ? 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-red.png'
       : 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-green.png';
-
     localStorage.setItem('theme', isRed ? 'red' : 'green');
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
+  // ============ АВТОРИЗАЦИЯ ============
+  let isRegisterMode = true;
+
+  function openAuthModal() {
+    document.getElementById('authModal').classList.add('active');
+    updateModalMode();
+  }
+
+  function closeAuthModal() {
+    document.getElementById('authModal').classList.remove('active');
+    document.getElementById('modalError').classList.remove('active');
+    document.getElementById('modalSuccess').classList.remove('active');
+    document.getElementById('authUsername').value = '';
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+  }
+
+  function updateModalMode() {
+    const title = document.getElementById('modalTitle');
+    const submit = document.getElementById('authSubmit');
+    const switchText = document.getElementById('modalSwitchText');
+    const usernameGroup = document.getElementById('authUsername').parentElement;
+
+    if (isRegisterMode) {
+      title.textContent = 'Регистрация';
+      submit.textContent = 'Создать аккаунт';
+      switchText.textContent = 'Уже есть аккаунт? Войти';
+      usernameGroup.style.display = 'block';
+    } else {
+      title.textContent = 'Вход';
+      submit.textContent = 'Войти';
+      switchText.textContent = 'Нет аккаунта? Зарегистрироваться';
+      usernameGroup.style.display = 'none';
+    }
+  }
+
+  document.getElementById('modalSwitchText').addEventListener('click', () => {
+    isRegisterMode = !isRegisterMode;
+    updateModalMode();
+  });
+
+  async function handleAuth() {
+    const username = document.getElementById('authUsername').value.trim();
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errorEl = document.getElementById('modalError');
+    const successEl = document.getElementById('modalSuccess');
+
+    errorEl.classList.remove('active');
+    successEl.classList.remove('active');
+
+    try {
+      if (isRegisterMode) {
+        if (!username || username.length < 3) {
+          throw new Error('Логин минимум 3 символа');
+        }
+        if (!email.includes('@')) {
+          throw new Error('Некорректный email');
+        }
+        if (password.length < 6) {
+          throw new Error('Пароль минимум 6 символов');
+        }
+
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { username: username },
+            emailRedirectTo: window.location.origin
+          }
+        });
+
+        if (error) throw error;
+
+        successEl.textContent = '✅ Аккаунт создан! Проверь почту для подтверждения.';
+        successEl.classList.add('active');
+      } else {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) throw error;
+
+        closeAuthModal();
+        updateAuthUI(data.user);
+      }
+    } catch (err) {
+      errorEl.textContent = '❌ ' + err.message;
+      errorEl.classList.add('active');
+    }
+  }
+
+  function updateAuthUI(user) {
+    const authBtn = document.getElementById('authBtn');
+    const avatar = document.getElementById('userAvatar');
+
+    if (user) {
+      authBtn.style.display = 'none';
+      avatar.style.display = 'flex';
+      avatar.textContent = (user.email || 'U')[0].toUpperCase();
+      avatar.title = user.email;
+    } else {
+      authBtn.style.display = 'block';
+      avatar.style.display = 'none';
+    }
+  }
+
+  function openProfile() {
+    alert('Профиль в разработке');
+  }
+
+  // ============ ОТЗЫВЫ ============
+  async function loadReviews() {
+    const list = document.getElementById('reviewsList');
+    list.innerHTML = '<p style="color: var(--text2); font-size: 14px;">Загрузка...</p>';
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('reviews')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<p style="color: var(--text2); font-size: 14px;">Пока нет отзывов.</p>';
+        return;
+      }
+
+      list.innerHTML = data.map(r => `
+        <div class="work-card" style="margin-bottom: 12px;">
+          <div style="color: var(--accent); margin-bottom: 6px;">${'⭐'.repeat(r.stars)}</div>
+          <p style="color: var(--text2); font-size: 13px; line-height: 1.55;">«${r.text}»</p>
+          <div style="color: var(--text3); font-size: 12px; margin-top: 8px;">— ${r.username}</div>
+        </div>
+      `).join('');
+    } catch (err) {
+      list.innerHTML = '<p style="color: #ff6b6b; font-size: 14px;">Ошибка загрузки отзывов</p>';
+      console.error(err);
+    }
+  }
+
+  // ============ ИНИЦИАЛИЗАЦИЯ ============
+  window.addEventListener('DOMContentLoaded', async () => {
+    // Тема
     if (localStorage.getItem('theme') === 'red') {
       document.body.classList.add('theme-red');
       document.getElementById('bannerImg').src = 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/banner-red.png';
       document.getElementById('favicon').href = 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-red.png';
     }
+
+    // Проверка сессии Supabase
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session?.user) {
+      updateAuthUI(session.user);
+    }
+
+    // Слушаем изменения авторизации
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      updateAuthUI(session?.user || null);
+    });
   });
 </script>
 
