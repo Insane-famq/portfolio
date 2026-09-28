@@ -90,6 +90,7 @@
     background: var(--card); border: 1px solid var(--border);
     border-radius: 18px; padding: 30px 25px; width: 100%; max-width: 400px;
     position: relative; box-shadow: 0 0 60px var(--accent-glow2);
+    max-height: 90vh; overflow-y: auto;
   }
   .modal-close {
     position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
@@ -107,12 +108,13 @@
     display: block; font-size: 11px; color: var(--text2);
     text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;
   }
-  .form-group input {
+  .form-group input, .form-group textarea {
     width: 100%; padding: 12px 14px; background: var(--bg);
     border: 1px solid var(--border); border-radius: 10px; color: #fff;
     font-size: 14px; font-family: inherit; transition: all 0.25s;
   }
-  .form-group input:focus {
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-group input:focus, .form-group textarea:focus {
     outline: none; border-color: var(--accent);
     box-shadow: 0 0 15px var(--accent-glow2);
   }
@@ -123,6 +125,7 @@
     margin-top: 10px; transition: all 0.25s;
   }
   .form-submit:active { transform: scale(0.97); box-shadow: 0 0 25px var(--accent-glow); }
+  .form-submit:disabled { opacity: 0.5; cursor: not-allowed; }
   .modal-switch {
     text-align: center; margin-top: 15px; font-size: 12px; color: var(--text2);
   }
@@ -142,6 +145,17 @@
     font-size: 12px; margin-bottom: 15px; display: none;
   }
   .modal-success.active { display: block; }
+  /* Звёзды */
+  .stars-input {
+    display: flex; gap: 8px; justify-content: center;
+    margin: 15px 0; font-size: 36px; cursor: pointer;
+  }
+  .stars-input span {
+    color: var(--text3); transition: all 0.2s;
+    user-select: none;
+  }
+  .stars-input span:hover,
+  .stars-input span.active { color: var(--accent); transform: scale(1.1); }
   .sidebar {
     position: fixed; top: 60px; left: 0; bottom: 0; width: 280px;
     background: rgba(10, 15, 13, 0.98); backdrop-filter: blur(20px);
@@ -401,7 +415,7 @@
   </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО -->
+<!-- МОДАЛЬНОЕ ОКНО — РЕГИСТРАЦИЯ -->
 <div class="modal-overlay" id="authModal">
   <div class="modal">
     <button class="modal-close" onclick="closeAuthModal()">×</button>
@@ -423,6 +437,34 @@
     <div class="modal-switch">
       <span id="modalSwitchText">Уже есть аккаунт? Войти</span>
     </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО — НАПИСАТЬ ОТЗЫВ -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReviewModal()">×</button>
+    <h2>Оставить отзыв</h2>
+    <div class="modal-error" id="reviewError"></div>
+    <div class="modal-success" id="reviewSuccess"></div>
+
+    <div class="form-group">
+      <label>Оценка</label>
+      <div class="stars-input" id="starsInput">
+        <span data-star="1">★</span>
+        <span data-star="2">★</span>
+        <span data-star="3">★</span>
+        <span data-star="4">★</span>
+        <span data-star="5">★</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Твой отзыв</label>
+      <textarea id="reviewText" placeholder="Напиши свой отзыв..."></textarea>
+    </div>
+
+    <button class="form-submit" id="reviewSubmit" onclick="submitReview()">Отправить отзыв</button>
   </div>
 </div>
 
@@ -730,6 +772,7 @@
   <div class="page" id="page-reviews">
     <div class="section">
       <h2>Отзывы</h2>
+      <button class="form-submit" style="margin-bottom: 20px;" onclick="openReviewModal()">✍️ Написать отзыв</button>
       <div id="reviewsList">
         <p style="color: var(--text2); font-size: 14px;">Загрузка отзывов...</p>
       </div>
@@ -770,6 +813,9 @@
 
 <script src="supabase-config.js"></script>
 <script>
+  let currentUser = null;
+  let selectedStars = 0;
+
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('burger').classList.toggle('open');
@@ -879,9 +925,7 @@
         const { data, error } = await supabaseClient.auth.signUp({
           email: fakeEmail,
           password: password,
-          options: {
-            data: { username: username }
-          }
+          options: { data: { username: username } }
         });
 
         if (error) throw error;
@@ -916,6 +960,7 @@
   }
 
   function updateAuthUI(user) {
+    currentUser = user;
     const authBtn = document.getElementById('authBtn');
     const avatar = document.getElementById('userAvatar');
     if (user) {
@@ -931,10 +976,74 @@
   }
 
   function openProfile() {
-    alert('Профиль в разработке');
+    alert('Профиль: ' + (currentUser?.user_metadata?.username || currentUser?.email || 'Гость'));
   }
 
   // ============ ОТЗЫВЫ ============
+  function openReviewModal() {
+    if (!currentUser) {
+      alert('Сначала войди или зарегистрируйся!');
+      openAuthModal();
+      return;
+    }
+    document.getElementById('reviewModal').classList.add('active');
+    document.getElementById('reviewError').classList.remove('active');
+    document.getElementById('reviewSuccess').classList.remove('active');
+    document.getElementById('reviewText').value = '';
+    selectedStars = 0;
+    document.querySelectorAll('#starsInput span').forEach(s => s.classList.remove('active'));
+  }
+
+  function closeReviewModal() {
+    document.getElementById('reviewModal').classList.remove('active');
+  }
+
+  // Клик по звёздам
+  document.querySelectorAll('#starsInput span').forEach(star => {
+    star.addEventListener('click', () => {
+      selectedStars = parseInt(star.dataset.star);
+      document.querySelectorAll('#starsInput span').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.star) <= selectedStars);
+      });
+    });
+  });
+
+  async function submitReview() {
+    const errorEl = document.getElementById('reviewError');
+    const successEl = document.getElementById('reviewSuccess');
+    const text = document.getElementById('reviewText').value.trim();
+
+    errorEl.classList.remove('active');
+    successEl.classList.remove('active');
+
+    try {
+      if (selectedStars < 1) throw new Error('Поставь оценку');
+      if (!text || text.length < 5) throw new Error('Напиши отзыв (мин. 5 символов)');
+
+      const username = currentUser.user_metadata?.username || currentUser.email;
+
+      const { error } = await supabaseClient.from('reviews').insert({
+        user_id: currentUser.id,
+        username: username,
+        stars: selectedStars,
+        text: text,
+        status: 'pending'
+      });
+
+      if (error) throw error;
+
+      successEl.textContent = '✅ Отзыв отправлен на модерацию!';
+      successEl.classList.add('active');
+
+      setTimeout(() => {
+        closeReviewModal();
+      }, 2000);
+    } catch (err) {
+      errorEl.textContent = '❌ ' + err.message;
+      errorEl.classList.add('active');
+    }
+  }
+
   async function loadReviews() {
     const list = document.getElementById('reviewsList');
     list.innerHTML = '<p style="color: var(--text2); font-size: 14px;">Загрузка...</p>';
