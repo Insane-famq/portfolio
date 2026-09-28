@@ -280,29 +280,32 @@
   .order-btn:active { transform: scale(0.96); box-shadow: 0 0 20px var(--accent-glow); }
   .template-card {
     background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
-    padding: 18px; margin-bottom: 12px; position: relative;
-    overflow: hidden; transition: all 0.4s;
+    margin-bottom: 14px; overflow: hidden; transition: all 0.4s;
   }
-  .template-card h3 { font-size: 16px; color: #fff; margin-bottom: 8px; letter-spacing: 1px; }
-  .template-card .tpl-for {
+  .template-card img {
+    width: 100%; display: block; aspect-ratio: 1/1; object-fit: cover;
+  }
+  .template-body { padding: 18px; }
+  .template-body h3 { font-size: 16px; color: #fff; margin-bottom: 4px; letter-spacing: 1px; }
+  .template-body .tpl-for {
     font-size: 12px; color: var(--text3); text-transform: uppercase;
-    letter-spacing: 1px; margin-bottom: 10px;
+    letter-spacing: 1.2px; margin-bottom: 10px;
   }
-  .template-card .tpl-desc {
+  .template-body .tpl-desc {
     font-size: 13px; color: var(--text2); line-height: 1.55; margin-bottom: 10px;
   }
-  .template-card .tpl-features {
+  .template-body .tpl-features {
     list-style: none; margin-bottom: 12px;
   }
-  .template-card .tpl-features li {
+  .template-body .tpl-features li {
     font-size: 13px; color: var(--text2); line-height: 1.7;
     padding-left: 18px; position: relative;
   }
-  .template-card .tpl-features li::before {
+  .template-body .tpl-features li::before {
     content: '•'; color: var(--accent); position: absolute;
     left: 4px; font-weight: 900; font-size: 16px;
   }
-  .template-card .tpl-price {
+  .template-body .tpl-price {
     font-size: 18px; color: var(--accent); font-weight: 900;
     margin-bottom: 12px; transition: color 0.4s;
   }
@@ -568,83 +571,101 @@
       <h2>Готовые шаблоны</h2>
 
       <div class="template-card">
-        <h3>🤖 Discord — Модерация</h3>
-        <div class="tpl-for">Для игровых серверов и семей</div>
-        <div class="tpl-desc">Полноценный бот-модератор. Автоматически следит за порядком, наказывает нарушителей, ведёт логи.</div>
-        <ul class="tpl-features">
-          <li>🔨 Баны, муты, кики</li>
-          <li>📋 Логи</li>
-          <li>🎭 Авто-роли</li>
-          <li>🛡️ Антиспам</li>
-        </ul>
-        <div class="tpl-price">2 500 ₽</div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Discord-Модерация" target="_blank">Заказать</a>
+        <img class="tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dmod-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dmod-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dmod-g.png" alt="Discord Модерация">
+        <div class="template-body">
+          <h3>🤖 Discord — Модерация</h3>
+          <div class="tpl-for">Для игровых серверов и семей</div>
+          <div class="tpl-desc">Полноценный бот-модератор. Автоматически следит за порядком, наказывает нарушителей, ведёт логи.</div>
+          <ul class="tpl-features">
+            <li>🔨 Баны, муты, кики</li>
+            <li>📋 Логи</li>
+            <li>🎭 Авто-роли</li>
+            <li>🛡️ Антиспам</li>
+          </ul>
+          <div class="tpl-price">2 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Discord-Модерация" target="_blank">Заказать</a>
+        </div>
       </div>
 
       <div class="template-card">
-        <h3>💬 Telegram — Магазин</h3>
-        <div class="tpl-for">Для инста-магазинов</div>
-        <div class="tpl-desc">Бот-магазин для продажи товаров. Клиенты выбирают товары, оформляют заказ, ты получаешь уведомление.</div>
-        <ul class="tpl-features">
-          <li>🛍️ Каталог</li>
-          <li>🛒 Корзина</li>
-          <li>📩 Заказы</li>
-        </ul>
-        <div class="tpl-price">3 000 ₽</div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Магазин" target="_blank">Заказать</a>
+        <img class="tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tshop-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tshop-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tshop-g.png" alt="Telegram Магазин">
+        <div class="template-body">
+          <h3>💬 Telegram — Магазин</h3>
+          <div class="tpl-for">Для инста-магазинов</div>
+          <div class="tpl-desc">Бот-магазин для продажи товаров. Клиенты выбирают товары, оформляют заказ, ты получаешь уведомление.</div>
+          <ul class="tpl-features">
+            <li>🛍️ Каталог</li>
+            <li>🛒 Корзина</li>
+            <li>📩 Заказы</li>
+          </ul>
+          <div class="tpl-price">3 000 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Магазин" target="_blank">Заказать</a>
+        </div>
       </div>
 
       <div class="template-card">
-        <h3>✂️ Telegram — Запись</h3>
-        <div class="tpl-for">Для барбершопов и салонов</div>
-        <div class="tpl-desc">Бот для записи клиентов. Клиент сам выбирает услугу, мастера и время — ты получаешь уведомление.</div>
-        <ul class="tpl-features">
-          <li>📅 Выбор услуги</li>
-          <li>⏰ Запись</li>
-          <li>🔔 Напоминания</li>
-        </ul>
-        <div class="tpl-price">2 500 ₽</div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Запись" target="_blank">Заказать</a>
+        <img class="tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tbook-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tbook-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tbook-g.png" alt="Telegram Запись">
+        <div class="template-body">
+          <h3>✂️ Telegram — Запись</h3>
+          <div class="tpl-for">Для барбершопов и салонов</div>
+          <div class="tpl-desc">Бот для записи клиентов. Клиент сам выбирает услугу, мастера и время — ты получаешь уведомление.</div>
+          <ul class="tpl-features">
+            <li>📅 Выбор услуги</li>
+            <li>⏰ Запись</li>
+            <li>🔔 Напоминания</li>
+          </ul>
+          <div class="tpl-price">2 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Запись" target="_blank">Заказать</a>
+        </div>
       </div>
 
       <div class="template-card">
-        <h3>🍕 Telegram — Доставка</h3>
-        <div class="tpl-for">Для кафе и доставки</div>
-        <div class="tpl-desc">Бот для приёма заказов на доставку. Клиент выбирает блюда из меню, оформляет заказ.</div>
-        <ul class="tpl-features">
-          <li>📋 Меню</li>
-          <li>🛒 Заказ</li>
-          <li>📊 Статус</li>
-        </ul>
-        <div class="tpl-price">3 000 ₽</div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Доставка" target="_blank">Заказать</a>
+        <img class="tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tdeliv-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tdeliv-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tdeliv-g.png" alt="Telegram Доставка">
+        <div class="template-body">
+          <h3>🍕 Telegram — Доставка</h3>
+          <div class="tpl-for">Для кафе и доставки</div>
+          <div class="tpl-desc">Бот для приёма заказов на доставку. Клиент выбирает блюда из меню, оформляет заказ.</div>
+          <ul class="tpl-features">
+            <li>📋 Меню</li>
+            <li>🛒 Заказ</li>
+            <li>📊 Статус</li>
+          </ul>
+          <div class="tpl-price">3 000 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Доставка" target="_blank">Заказать</a>
+        </div>
       </div>
 
       <div class="template-card">
-        <h3>🎓 Telegram — Заявки</h3>
-        <div class="tpl-for">Для школ и услуг</div>
-        <div class="tpl-desc">Простой бот для приёма заявок. Клиент заполняет форму — заявка летит тебе в личку.</div>
-        <ul class="tpl-features">
-          <li>📝 Форма</li>
-          <li>📩 Отправка</li>
-          <li>✅ Автоответ</li>
-        </ul>
-        <div class="tpl-price">1 500 ₽</div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Заявки" target="_blank">Заказать</a>
+        <img class="tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tform-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tform-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-tform-g.png" alt="Telegram Заявки">
+        <div class="template-body">
+          <h3>🎓 Telegram — Заявки</h3>
+          <div class="tpl-for">Для школ и услуг</div>
+          <div class="tpl-desc">Простой бот для приёма заявок. Клиент заполняет форму — заявка летит тебе в личку.</div>
+          <ul class="tpl-features">
+            <li>📝 Форма</li>
+            <li>📩 Отправка</li>
+            <li>✅ Автоответ</li>
+          </ul>
+          <div class="tpl-price">1 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Telegram-Заявки" target="_blank">Заказать</a>
+        </div>
       </div>
 
       <div class="template-card">
-        <h3>📊 Discord — Семья</h3>
-        <div class="tpl-for">Для кланов</div>
-        <div class="tpl-desc">Бот для управления семьёй. Система заявок, жалоб, логов и защиты от рейдов.</div>
-        <ul class="tpl-features">
-          <li>📩 Заявки</li>
-          <li>⚖️ Жалобы</li>
-          <li>🛡️ Антиспам</li>
-          <li>🚨 Антирейд</li>
-        </ul>
-        <div class="tpl-price">3 500 ₽</div>
-        <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Discord-Семья" target="_blank">Заказать</a>
+        <img class="tpl-img" data-g="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dfam-g.png" data-r="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dfam-r.png" src="https://raw.githubusercontent.com/Insane-famq/portfolio/main/tpl-dfam-g.png" alt="Discord Семья">
+        <div class="template-body">
+          <h3>📊 Discord — Семья</h3>
+          <div class="tpl-for">Для кланов</div>
+          <div class="tpl-desc">Бот для управления семьёй. Система заявок, жалоб, логов и защиты от рейдов.</div>
+          <ul class="tpl-features">
+            <li>📩 Заявки</li>
+            <li>⚖️ Жалобы</li>
+            <li>🛡️ Антиспам</li>
+            <li>🚨 Антирейд</li>
+          </ul>
+          <div class="tpl-price">3 500 ₽</div>
+          <a class="order-btn" href="https://t.me/MarioOrdersBot?text=Привет!%20Хочу%20шаблон%20Discord-Семья" target="_blank">Заказать</a>
+        </div>
       </div>
 
       <div class="tpl-note">
@@ -785,6 +806,13 @@
     if (page === 'reviews') loadReviews();
   }
 
+  function updateTemplateImages() {
+    const isRed = document.body.classList.contains('theme-red');
+    document.querySelectorAll('.tpl-img').forEach(img => {
+      img.src = isRed ? img.dataset.r : img.dataset.g;
+    });
+  }
+
   function toggleTheme() {
     document.body.classList.toggle('theme-red');
     const isRed = document.body.classList.contains('theme-red');
@@ -794,6 +822,7 @@
     document.getElementById('favicon').href = isRed
       ? 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-red.png'
       : 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-green.png';
+    updateTemplateImages();
     localStorage.setItem('theme', isRed ? 'red' : 'green');
   }
 
@@ -980,6 +1009,7 @@
       document.body.classList.add('theme-red');
       document.getElementById('bannerImg').src = 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/banner-red.png';
       document.getElementById('favicon').href = 'https://raw.githubusercontent.com/Insane-famq/portfolio/main/favicon-red.png';
+      updateTemplateImages();
     }
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session?.user) updateAuthUI(session.user);
