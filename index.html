@@ -160,7 +160,6 @@
   }
   .stars-input span:hover,
   .stars-input span.active { color: var(--accent); transform: scale(1.1); }
-  /* Профиль */
   .profile-avatar-big {
     width: 100px; height: 100px; border-radius: 50%;
     background: var(--accent); margin: 0 auto 15px;
@@ -203,6 +202,35 @@
   .btn-approve { background: var(--accent); color: #050807; }
   .btn-reject { background: #ff3b3b; color: #fff; }
   .btn-delete { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+  .user-row {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; margin-bottom: 10px;
+  }
+  .user-row .head {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .user-row .u-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center;
+    justify-content: center; color: #050807; font-weight: 900;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .user-row .u-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-row .u-info { flex: 1; }
+  .user-row .u-name { color: #fff; font-weight: 700; font-size: 14px; }
+  .user-row .u-meta { color: var(--text3); font-size: 11px; margin-top: 2px; }
+  .user-row .u-actions {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .user-row .u-actions button {
+    flex: 1; min-width: 80px; padding: 8px; border: none;
+    border-radius: 6px; font-size: 11px; font-weight: 700;
+    cursor: pointer; text-transform: uppercase;
+  }
+  .btn-ban { background: #ffaa00; color: #050807; }
+  .btn-unban { background: var(--accent); color: #050807; }
+  .btn-admin { background: #7b2ff7; color: #fff; }
+  .btn-unadmin { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
   .sidebar {
     position: fixed; top: 60px; left: 0; bottom: 0; width: 280px;
     background: rgba(10, 15, 13, 0.98); backdrop-filter: blur(20px);
@@ -938,7 +966,7 @@
       }, 200);
     }
     if (page === 'reviews') loadReviews();
-    if (page === 'admin') loadAdminReviews();
+    if (page === 'admin') showAdminSection('reviews');
   }
 
   function updateTemplateImages() {
@@ -1070,7 +1098,6 @@
       authBtn.style.display = 'none';
       avatar.style.display = 'flex';
 
-      // Загружаем профиль
       const { data } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -1078,6 +1105,14 @@
         .single();
 
       currentProfile = data;
+
+      // Проверка бана
+      if (data?.banned) {
+        await supabaseClient.auth.signOut();
+        alert('🚫 Ваш аккаунт заблокирован.');
+        updateAuthUI(null);
+        return;
+      }
 
       const name = data?.username || user.user_metadata?.username || user.email || 'U';
       if (data?.avatar_url) {
@@ -1088,7 +1123,6 @@
       }
       avatar.title = name;
 
-      // Показываем админку если админ
       if (data?.is_admin) {
         adminItem.style.display = 'flex';
       } else {
@@ -1113,8 +1147,6 @@
     document.getElementById('profileUsername').value = name;
 
     const avatarBig = document.getElementById('profileAvatarBig');
-    const letter = document.getElementById('profileAvatarLetter');
-
     if (currentProfile?.avatar_url) {
       avatarBig.innerHTML = `<img src="${currentProfile.avatar_url}" alt="${name}">`;
     } else {
@@ -1295,9 +1327,17 @@
   }
 
   // ============ АДМИН-ПАНЕЛЬ ============
+  function showAdminSection(section) {
+    const content = document.getElementById('adminContent');
+    if (section === 'reviews') loadAdminReviews();
+    if (section === 'users') loadAdminUsers();
+    if (section === 'prices') loadAdminPrices();
+  }
+
+  // --- ОТЗЫВЫ ---
   async function loadAdminReviews() {
     const content = document.getElementById('adminContent');
-    content.innerHTML = '';
+    content.innerHTML = '<p style="color: var(--text2);">Загрузка...</p>';
 
     try {
       const { data, error } = await supabaseClient
@@ -1326,7 +1366,7 @@
           </div>
         `).join('');
     } catch (err) {
-      content.innerHTML = '<p style="color: #ff6b6b;">Ошибка загрузки</p>';
+      content.innerHTML = '<p style="color: #ff6b6b;">Ошибка: ' + err.message + '</p>';
     }
   }
 
@@ -1346,15 +1386,129 @@
     loadAdminReviews();
   }
 
-  function showAdminSection(section) {
+  // --- ПОЛЬЗОВАТЕЛИ ---
+  async function loadAdminUsers() {
     const content = document.getElementById('adminContent');
-    if (section === 'reviews') loadAdminReviews();
-    if (section === 'users') {
-      content.innerHTML = '<p style="color: var(--text2); margin-top: 20px;">Раздел в разработке...</p>';
+    content.innerHTML = '<p style="color: var(--text2);">Загрузка...</p>';
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        content.innerHTML = '<p style="color: var(--text2);">Пользователей нет.</p>';
+        return;
+      }
+
+      content.innerHTML = '<h3 style="color: #fff; margin: 20px 0 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Все пользователи (' + data.length + ')</h3>' +
+        data.map(u => `
+          <div class="user-row">
+            <div class="head">
+              <div class="u-avatar">${u.avatar_url ? `<img src="${u.avatar_url}">` : (u.username || 'U')[0].toUpperCase()}</div>
+              <div class="u-info">
+                <div class="u-name">${u.username}${u.is_admin ? ' 👑' : ''}${u.banned ? ' 🚫' : ''}</div>
+                <div class="u-meta">${u.id.substring(0, 8)}... • ${new Date(u.created_at).toLocaleDateString('ru-RU')}</div>
+              </div>
+            </div>
+            <div class="u-actions">
+              ${u.banned
+                ? `<button class="btn-unban" onclick="adminUnban('${u.id}')">✅ Разбанить</button>`
+                : `<button class="btn-ban" onclick="adminBan('${u.id}')">🚫 Забанить</button>`}
+              ${u.is_admin
+                ? `<button class="btn-unadmin" onclick="adminUnadmin('${u.id}')">➖ Снять админа</button>`
+                : `<button class="btn-admin" onclick="adminAdmin('${u.id}')">👑 Сделать админом</button>`}
+              <button class="btn-approve" onclick="adminChangeUsername('${u.id}', '${u.username}')">✏️ Ник</button>
+              <button class="btn-delete" onclick="adminDeleteUser('${u.id}', '${u.username}')">🗑️ Удалить</button>
+            </div>
+          </div>
+        `).join('');
+    } catch (err) {
+      content.innerHTML = '<p style="color: #ff6b6b;">Ошибка: ' + err.message + '</p>';
     }
-    if (section === 'prices') {
-      content.innerHTML = '<p style="color: var(--text2); margin-top: 20px;">Раздел в разработке...</p>';
+  }
+
+  async function adminBan(id) {
+    await supabaseClient.from('profiles').update({ banned: true }).eq('id', id);
+    loadAdminUsers();
+  }
+
+  async function adminUnban(id) {
+    await supabaseClient.from('profiles').update({ banned: false }).eq('id', id);
+    loadAdminUsers();
+  }
+
+  async function adminAdmin(id) {
+    await supabaseClient.from('profiles').update({ is_admin: true }).eq('id', id);
+    loadAdminUsers();
+  }
+
+  async function adminUnadmin(id) {
+    await supabaseClient.from('profiles').update({ is_admin: false }).eq('id', id);
+    loadAdminUsers();
+  }
+
+  async function adminChangeUsername(id, oldName) {
+    const newName = prompt('Новый логин:', oldName);
+    if (!newName || newName.trim().length < 3) return;
+    await supabaseClient.from('profiles').update({ username: newName.trim() }).eq('id', id);
+    loadAdminUsers();
+  }
+
+  async function adminDeleteUser(id, name) {
+    if (!confirm(`Удалить профиль ${name}? (Аккаунт в auth останется)`)) return;
+    await supabaseClient.from('profiles').delete().eq('id', id);
+    loadAdminUsers();
+  }
+
+  // --- ЦЕНЫ ---
+  async function loadAdminPrices() {
+    const content = document.getElementById('adminContent');
+    content.innerHTML = '<p style="color: var(--text2);">Загрузка...</p>';
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('settings')
+        .select('*')
+        .order('key');
+
+      if (error) throw error;
+
+      const labels = {
+        'price_discord': '🎮 Discord-бот',
+        'price_telegram': '💬 Telegram-бот',
+        'price_site': '🌐 Сайт',
+        'price_auto': '⚙️ Автоматизация',
+        'price_dmod': '🤖 Шаблон: Discord Модерация',
+        'price_tshop': '💬 Шаблон: TG Магазин',
+        'price_tbook': '✂️ Шаблон: TG Запись',
+        'price_tdeliv': '🍕 Шаблон: TG Доставка',
+        'price_tform': '🎓 Шаблон: TG Заявки',
+        'price_dfam': '📊 Шаблон: Discord Семья'
+      };
+
+      content.innerHTML = '<h3 style="color: #fff; margin: 20px 0 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">💰 Цены</h3>' +
+        data.map(s => `
+          <div class="user-row">
+            <div class="u-name" style="margin-bottom: 8px;">${labels[s.key] || s.key}</div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="set_${s.key}" value="${s.value}" style="flex: 1; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: #fff;" />
+              <button class="btn-approve" style="padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;" onclick="adminSavePrice('${s.key}')">💾</button>
+            </div>
+          </div>
+        `).join('');
+    } catch (err) {
+      content.innerHTML = '<p style="color: #ff6b6b;">Ошибка: ' + err.message + '</p>';
     }
+  }
+
+  async function adminSavePrice(key) {
+    const value = document.getElementById('set_' + key).value.trim();
+    await supabaseClient.from('settings').update({ value: value }).eq('key', key);
+    alert('✅ Сохранено!');
   }
 
   // ============ ИНИЦИАЛИЗАЦИЯ ============
@@ -1371,7 +1525,4 @@
       await updateAuthUI(session?.user || null);
     });
   });
-</script>
-
-</body>
- </html>
+ </script>
