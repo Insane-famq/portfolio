@@ -413,24 +413,12 @@
       <label>Логин</label>
       <input type="text" id="authUsername" placeholder="Введи логин" />
     </div>
-    <div class="form-group" id="emailGroup">
-      <label>Email</label>
-      <input type="email" id="authEmail" placeholder="Введи email" />
-    </div>
     <div class="form-group" id="passwordGroup">
       <label>Пароль</label>
       <input type="password" id="authPassword" placeholder="Введи пароль" />
     </div>
 
     <button class="form-submit" id="authSubmit" onclick="handleAuth()">Создать аккаунт</button>
-
-    <div id="otpBlock" style="display: none;">
-      <div class="form-group">
-        <label>Код из письма</label>
-        <input type="text" id="otpCode" placeholder="Введи 6-значный код" maxlength="6" />
-      </div>
-      <button class="form-submit" onclick="verifyOtp()">Подтвердить</button>
-    </div>
 
     <div class="modal-switch">
       <span id="modalSwitchText">Уже есть аккаунт? Войти</span>
@@ -840,16 +828,12 @@
   }
 
   function resetAuthModal() {
-    document.getElementById('otpBlock').style.display = 'none';
     document.getElementById('authSubmit').style.display = 'block';
     document.getElementById('usernameGroup').style.display = 'block';
-    document.getElementById('emailGroup').style.display = 'block';
     document.getElementById('passwordGroup').style.display = 'block';
     document.getElementById('modalSwitchText').style.display = 'block';
     document.getElementById('authUsername').value = '';
-    document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
-    document.getElementById('otpCode').value = '';
     document.getElementById('modalError').classList.remove('active');
     document.getElementById('modalSuccess').classList.remove('active');
   }
@@ -878,7 +862,6 @@
 
   async function handleAuth() {
     const username = document.getElementById('authUsername').value.trim();
-    const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const errorEl = document.getElementById('modalError');
     const successEl = document.getElementById('modalSuccess');
@@ -889,31 +872,37 @@
     try {
       if (isRegisterMode) {
         if (!username || username.length < 3) throw new Error('Логин минимум 3 символа');
-        if (!email.includes('@')) throw new Error('Некорректный email');
         if (password.length < 6) throw new Error('Пароль минимум 6 символов');
 
+        const fakeEmail = username.toLowerCase().replace(/[^a-z0-9]/g, '') + '@mario.local';
+
         const { data, error } = await supabaseClient.auth.signUp({
-          email: email,
+          email: fakeEmail,
           password: password,
           options: {
-            data: { username: username },
-            emailRedirectTo: window.location.origin
+            data: { username: username }
           }
         });
 
         if (error) throw error;
 
-        document.getElementById('otpBlock').style.display = 'block';
-        document.getElementById('authSubmit').style.display = 'none';
-        document.getElementById('usernameGroup').style.display = 'none';
-        document.getElementById('emailGroup').style.display = 'none';
-        document.getElementById('passwordGroup').style.display = 'none';
-        document.getElementById('modalSwitchText').style.display = 'none';
-        successEl.textContent = '✅ Код отправлен на почту! Проверь email.';
+        successEl.textContent = '✅ Аккаунт создан! Входим...';
         successEl.classList.add('active');
+
+        setTimeout(async () => {
+          const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+            email: fakeEmail,
+            password: password
+          });
+          if (!signInError) {
+            closeAuthModal();
+            updateAuthUI(signInData.user);
+          }
+        }, 1000);
       } else {
+        const fakeEmail = username.toLowerCase().replace(/[^a-z0-9]/g, '') + '@mario.local';
         const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: email,
+          email: fakeEmail,
           password: password
         });
         if (error) throw error;
@@ -926,46 +915,15 @@
     }
   }
 
-  async function verifyOtp() {
-    const email = document.getElementById('authEmail').value.trim();
-    const token = document.getElementById('otpCode').value.trim();
-    const errorEl = document.getElementById('modalError');
-    const successEl = document.getElementById('modalSuccess');
-
-    errorEl.classList.remove('active');
-    successEl.classList.remove('active');
-
-    try {
-      const { data, error } = await supabaseClient.auth.verifyOtp({
-        email: email,
-        token: token,
-        type: 'email'
-      });
-
-      if (error) throw error;
-
-      successEl.textContent = '✅ Аккаунт подтверждён! Входим...';
-      successEl.classList.add('active');
-
-      setTimeout(() => {
-        closeAuthModal();
-        updateAuthUI(data.user);
-        resetAuthModal();
-      }, 1500);
-    } catch (err) {
-      errorEl.textContent = '❌ ' + err.message;
-      errorEl.classList.add('active');
-    }
-  }
-
   function updateAuthUI(user) {
     const authBtn = document.getElementById('authBtn');
     const avatar = document.getElementById('userAvatar');
     if (user) {
       authBtn.style.display = 'none';
       avatar.style.display = 'flex';
-      avatar.textContent = (user.email || 'U')[0].toUpperCase();
-      avatar.title = user.email;
+      const name = user.user_metadata?.username || user.email || 'U';
+      avatar.textContent = name[0].toUpperCase();
+      avatar.title = name;
     } else {
       authBtn.style.display = 'block';
       avatar.style.display = 'none';
