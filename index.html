@@ -516,7 +516,7 @@
     <div id="otpBlock" style="display: none;">
       <div class="form-group">
         <label>Код из письма</label>
-        <input type="text" id="otpCode" placeholder="Введи 6-значный код" maxlength="6" />
+        <input type="text" id="otpCode" placeholder="Введи код из письма" />
       </div>
       <button class="form-submit" onclick="verifyOtp()">Подтвердить</button>
     </div>
@@ -1001,20 +1001,17 @@
     localStorage.setItem('theme', isRed ? 'red' : 'green');
   }
 
-  // ============ ЗАГРУЗКА ЦЕН ИЗ БД ============
+  // ============ ЗАГРУЗКА ЦЕН ============
   async function loadPrices() {
     try {
       const { data, error } = await supabaseClient.from('settings').select('*');
       if (error) throw error;
-
       const prices = {};
       data.forEach(s => { prices[s.key] = s.value; });
-
       if (prices.price_discord) document.getElementById('price_discord').textContent = 'от ' + prices.price_discord + ' ₽';
       if (prices.price_telegram) document.getElementById('price_telegram').textContent = 'от ' + prices.price_telegram + ' ₽';
       if (prices.price_site) document.getElementById('price_site').textContent = 'от ' + prices.price_site + ' ₽';
       if (prices.price_auto) document.getElementById('price_auto').textContent = 'от ' + prices.price_auto + ' ₽';
-
       if (prices.price_dmod) document.getElementById('price_dmod').textContent = prices.price_dmod + ' ₽';
       if (prices.price_tshop) document.getElementById('price_tshop').textContent = prices.price_tshop + ' ₽';
       if (prices.price_tbook) document.getElementById('price_tbook').textContent = prices.price_tbook + ' ₽';
@@ -1070,7 +1067,7 @@
       submit.textContent = 'Войти';
       switchText.textContent = 'Нет аккаунта? Зарегистрироваться';
       document.getElementById('usernameGroup').style.display = 'none';
-      emailGroup.style.display = 'none';
+      emailGroup.style.display = 'block';
     }
   }
 
@@ -1103,7 +1100,6 @@
 
         if (error) throw error;
 
-        // Скрываем форму, показываем ввод кода
         document.getElementById('usernameGroup').style.display = 'none';
         document.getElementById('emailGroup').style.display = 'none';
         document.getElementById('passwordGroup').style.display = 'none';
@@ -1113,6 +1109,7 @@
         successEl.textContent = '✅ Код отправлен на почту! Проверь email.';
         successEl.classList.add('active');
       } else {
+        if (!email.includes('@')) throw new Error('Некорректный email');
         const { data, error } = await supabaseClient.auth.signInWithPassword({
           email: email,
           password: password
@@ -1137,7 +1134,7 @@
     successEl.classList.remove('active');
 
     try {
-      if (!token || token.length !== 6) throw new Error('Код должен быть 6 цифр');
+      if (!token || token.length < 4) throw new Error('Введи код из письма');
 
       const { data, error } = await supabaseClient.auth.verifyOtp({
         email: email,
@@ -1208,16 +1205,13 @@
     }
   }
 
-  // ============ ПРОФИЛЬ ============
   function openProfile() {
     if (!currentUser) return;
     document.getElementById('profileModal').classList.add('active');
     document.getElementById('profileError').classList.remove('active');
     document.getElementById('profileSuccess').classList.remove('active');
-
     const name = currentProfile?.username || 'U';
     document.getElementById('profileUsername').value = name;
-
     const avatarBig = document.getElementById('profileAvatarBig');
     if (currentProfile?.avatar_url) {
       avatarBig.innerHTML = `<img src="${currentProfile.avatar_url}" alt="${name}">`;
@@ -1233,41 +1227,25 @@
   async function uploadAvatar(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const errorEl = document.getElementById('profileError');
     const successEl = document.getElementById('profileSuccess');
     errorEl.classList.remove('active');
     successEl.classList.remove('active');
-
     try {
       if (file.size > 2 * 1024 * 1024) throw new Error('Файл не больше 2 МБ');
-
       const ext = file.name.split('.').pop();
       const fileName = `${currentUser.id}_${Date.now()}.${ext}`;
-
       const { error: uploadError } = await supabaseClient.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-
+        .from('avatars').upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabaseClient.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
+      const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
       const avatarUrl = urlData.publicUrl;
-
       const { error: updateError } = await supabaseClient
-        .from('profiles')
-        .update({ avatar_url: avatarUrl })
-        .eq('id', currentUser.id);
-
+        .from('profiles').update({ avatar_url: avatarUrl }).eq('id', currentUser.id);
       if (updateError) throw updateError;
-
       currentProfile.avatar_url = avatarUrl;
       await updateAuthUI(currentUser);
       openProfile();
-
       successEl.textContent = '✅ Аватар обновлён!';
       successEl.classList.add('active');
     } catch (err) {
@@ -1282,20 +1260,13 @@
     const successEl = document.getElementById('profileSuccess');
     errorEl.classList.remove('active');
     successEl.classList.remove('active');
-
     try {
       if (!newName || newName.length < 3) throw new Error('Ник минимум 3 символа');
-
       const { error } = await supabaseClient
-        .from('profiles')
-        .update({ username: newName })
-        .eq('id', currentUser.id);
-
+        .from('profiles').update({ username: newName }).eq('id', currentUser.id);
       if (error) throw error;
-
       currentProfile.username = newName;
       await updateAuthUI(currentUser);
-
       successEl.textContent = '✅ Ник обновлён!';
       successEl.classList.add('active');
     } catch (err) {
@@ -1342,16 +1313,12 @@
     const errorEl = document.getElementById('reviewError');
     const successEl = document.getElementById('reviewSuccess');
     const text = document.getElementById('reviewText').value.trim();
-
     errorEl.classList.remove('active');
     successEl.classList.remove('active');
-
     try {
       if (selectedStars < 1) throw new Error('Поставь оценку');
       if (!text || text.length < 5) throw new Error('Напиши отзыв (мин. 5 символов)');
-
       const username = currentProfile?.username || currentUser.email;
-
       const { error } = await supabaseClient.from('reviews').insert({
         user_id: currentUser.id,
         username: username,
@@ -1359,12 +1326,9 @@
         text: text,
         status: 'pending'
       });
-
       if (error) throw error;
-
       successEl.textContent = '✅ Отзыв отправлен на модерацию!';
       successEl.classList.add('active');
-
       setTimeout(() => closeReviewModal(), 2000);
     } catch (err) {
       errorEl.textContent = '❌ ' + err.message;
@@ -1377,9 +1341,7 @@
     list.innerHTML = '<p style="color: var(--text2); font-size: 14px;">Загрузка...</p>';
     try {
       const { data, error } = await supabaseClient
-        .from('reviews')
-        .select('*')
-        .eq('status', 'approved')
+        .from('reviews').select('*').eq('status', 'approved')
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (!data || data.length === 0) {
@@ -1521,7 +1483,6 @@
     try {
       const { data, error } = await supabaseClient.from('settings').select('*').order('key');
       if (error) throw error;
-
       const labels = {
         'price_discord': '🎮 Discord-бот',
         'price_telegram': '💬 Telegram-бот',
@@ -1534,7 +1495,6 @@
         'price_tform': '🎓 Шаблон: TG Заявки',
         'price_dfam': '📊 Шаблон: Discord Семья'
       };
-
       content.innerHTML = '<h3 style="color: #fff; margin: 20px 0 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">💰 Цены</h3>' +
         data.map(s => `
           <div class="user-row">
@@ -1572,4 +1532,4 @@
       await updateAuthUI(session?.user || null);
     });
   });
- </script>
+</script>
