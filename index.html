@@ -502,12 +502,24 @@
       <label>Логин</label>
       <input type="text" id="authUsername" placeholder="Введи логин" />
     </div>
+    <div class="form-group" id="emailGroup">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="Введи email" />
+    </div>
     <div class="form-group" id="passwordGroup">
       <label>Пароль</label>
       <input type="password" id="authPassword" placeholder="Введи пароль" />
     </div>
 
     <button class="form-submit" id="authSubmit" onclick="handleAuth()">Создать аккаунт</button>
+
+    <div id="otpBlock" style="display: none;">
+      <div class="form-group">
+        <label>Код из письма</label>
+        <input type="text" id="otpCode" placeholder="Введи 6-значный код" maxlength="6" />
+      </div>
+      <button class="form-submit" onclick="verifyOtp()">Подтвердить</button>
+    </div>
 
     <div class="modal-switch">
       <span id="modalSwitchText">Уже есть аккаунт? Войти</span>
@@ -998,13 +1010,11 @@
       const prices = {};
       data.forEach(s => { prices[s.key] = s.value; });
 
-      // Услуги
       if (prices.price_discord) document.getElementById('price_discord').textContent = 'от ' + prices.price_discord + ' ₽';
       if (prices.price_telegram) document.getElementById('price_telegram').textContent = 'от ' + prices.price_telegram + ' ₽';
       if (prices.price_site) document.getElementById('price_site').textContent = 'от ' + prices.price_site + ' ₽';
       if (prices.price_auto) document.getElementById('price_auto').textContent = 'от ' + prices.price_auto + ' ₽';
 
-      // Шаблоны
       if (prices.price_dmod) document.getElementById('price_dmod').textContent = prices.price_dmod + ' ₽';
       if (prices.price_tshop) document.getElementById('price_tshop').textContent = prices.price_tshop + ' ₽';
       if (prices.price_tbook) document.getElementById('price_tbook').textContent = prices.price_tbook + ' ₽';
@@ -1032,10 +1042,14 @@
   function resetAuthModal() {
     document.getElementById('authSubmit').style.display = 'block';
     document.getElementById('usernameGroup').style.display = 'block';
+    document.getElementById('emailGroup').style.display = 'block';
     document.getElementById('passwordGroup').style.display = 'block';
+    document.getElementById('otpBlock').style.display = 'none';
     document.getElementById('modalSwitchText').style.display = 'block';
     document.getElementById('authUsername').value = '';
+    document.getElementById('authEmail').value = '';
     document.getElementById('authPassword').value = '';
+    document.getElementById('otpCode').value = '';
     document.getElementById('modalError').classList.remove('active');
     document.getElementById('modalSuccess').classList.remove('active');
   }
@@ -1044,16 +1058,19 @@
     const title = document.getElementById('modalTitle');
     const submit = document.getElementById('authSubmit');
     const switchText = document.getElementById('modalSwitchText');
+    const emailGroup = document.getElementById('emailGroup');
     if (isRegisterMode) {
       title.textContent = 'Регистрация';
       submit.textContent = 'Создать аккаунт';
       switchText.textContent = 'Уже есть аккаунт? Войти';
       document.getElementById('usernameGroup').style.display = 'block';
+      emailGroup.style.display = 'block';
     } else {
       title.textContent = 'Вход';
       submit.textContent = 'Войти';
       switchText.textContent = 'Нет аккаунта? Зарегистрироваться';
       document.getElementById('usernameGroup').style.display = 'none';
+      emailGroup.style.display = 'none';
     }
   }
 
@@ -1064,6 +1081,7 @@
 
   async function handleAuth() {
     const username = document.getElementById('authUsername').value.trim();
+    const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const errorEl = document.getElementById('modalError');
     const successEl = document.getElementById('modalSuccess');
@@ -1074,41 +1092,69 @@
     try {
       if (isRegisterMode) {
         if (!username || username.length < 3) throw new Error('Логин минимум 3 символа');
+        if (!email.includes('@')) throw new Error('Некорректный email');
         if (password.length < 6) throw new Error('Пароль минимум 6 символов');
 
-        const fakeEmail = username.toLowerCase().replace(/[^a-z0-9]/g, '') + '@mario.local';
-
         const { data, error } = await supabaseClient.auth.signUp({
-          email: fakeEmail,
+          email: email,
           password: password,
           options: { data: { username: username } }
         });
 
         if (error) throw error;
 
-        successEl.textContent = '✅ Аккаунт создан! Входим...';
+        // Скрываем форму, показываем ввод кода
+        document.getElementById('usernameGroup').style.display = 'none';
+        document.getElementById('emailGroup').style.display = 'none';
+        document.getElementById('passwordGroup').style.display = 'none';
+        document.getElementById('authSubmit').style.display = 'none';
+        document.getElementById('modalSwitchText').style.display = 'none';
+        document.getElementById('otpBlock').style.display = 'block';
+        successEl.textContent = '✅ Код отправлен на почту! Проверь email.';
         successEl.classList.add('active');
-
-        setTimeout(async () => {
-          const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
-            email: fakeEmail,
-            password: password
-          });
-          if (!signInError) {
-            closeAuthModal();
-            updateAuthUI(signInData.user);
-          }
-        }, 1000);
       } else {
-        const fakeEmail = username.toLowerCase().replace(/[^a-z0-9]/g, '') + '@mario.local';
         const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: fakeEmail,
+          email: email,
           password: password
         });
         if (error) throw error;
         closeAuthModal();
         updateAuthUI(data.user);
       }
+    } catch (err) {
+      errorEl.textContent = '❌ ' + err.message;
+      errorEl.classList.add('active');
+    }
+  }
+
+  async function verifyOtp() {
+    const email = document.getElementById('authEmail').value.trim();
+    const token = document.getElementById('otpCode').value.trim();
+    const errorEl = document.getElementById('modalError');
+    const successEl = document.getElementById('modalSuccess');
+
+    errorEl.classList.remove('active');
+    successEl.classList.remove('active');
+
+    try {
+      if (!token || token.length !== 6) throw new Error('Код должен быть 6 цифр');
+
+      const { data, error } = await supabaseClient.auth.verifyOtp({
+        email: email,
+        token: token,
+        type: 'signup'
+      });
+
+      if (error) throw error;
+
+      successEl.textContent = '✅ Аккаунт подтверждён! Входим...';
+      successEl.classList.add('active');
+
+      setTimeout(() => {
+        closeAuthModal();
+        updateAuthUI(data.user);
+        resetAuthModal();
+      }, 1500);
     } catch (err) {
       errorEl.textContent = '❌ ' + err.message;
       errorEl.classList.add('active');
@@ -1363,20 +1409,14 @@
   async function loadAdminReviews() {
     const content = document.getElementById('adminContent');
     content.innerHTML = '<p style="color: var(--text2);">Загрузка...</p>';
-
     try {
       const { data, error } = await supabaseClient
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+        .from('reviews').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-
       if (!data || data.length === 0) {
         content.innerHTML = '<p style="color: var(--text2); font-size: 14px;">Отзывов нет.</p>';
         return;
       }
-
       content.innerHTML = '<h3 style="color: #fff; margin: 20px 0 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Все отзывы</h3>' +
         data.map(r => `
           <div class="admin-review">
@@ -1399,12 +1439,10 @@
     await supabaseClient.from('reviews').update({ status: 'approved' }).eq('id', id);
     loadAdminReviews();
   }
-
   async function adminReject(id) {
     await supabaseClient.from('reviews').update({ status: 'rejected' }).eq('id', id);
     loadAdminReviews();
   }
-
   async function adminDelete(id) {
     if (!confirm('Удалить отзыв?')) return;
     await supabaseClient.from('reviews').delete().eq('id', id);
@@ -1414,20 +1452,14 @@
   async function loadAdminUsers() {
     const content = document.getElementById('adminContent');
     content.innerHTML = '<p style="color: var(--text2);">Загрузка...</p>';
-
     try {
       const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+        .from('profiles').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-
       if (!data || data.length === 0) {
         content.innerHTML = '<p style="color: var(--text2);">Пользователей нет.</p>';
         return;
       }
-
       content.innerHTML = '<h3 style="color: #fff; margin: 20px 0 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Все пользователи (' + data.length + ')</h3>' +
         data.map(u => `
           <div class="user-row">
@@ -1459,29 +1491,24 @@
     await supabaseClient.from('profiles').update({ banned: true }).eq('id', id);
     loadAdminUsers();
   }
-
   async function adminUnban(id) {
     await supabaseClient.from('profiles').update({ banned: false }).eq('id', id);
     loadAdminUsers();
   }
-
   async function adminAdmin(id) {
     await supabaseClient.from('profiles').update({ is_admin: true }).eq('id', id);
     loadAdminUsers();
   }
-
   async function adminUnadmin(id) {
     await supabaseClient.from('profiles').update({ is_admin: false }).eq('id', id);
     loadAdminUsers();
   }
-
   async function adminChangeUsername(id, oldName) {
     const newName = prompt('Новый логин:', oldName);
     if (!newName || newName.trim().length < 3) return;
     await supabaseClient.from('profiles').update({ username: newName.trim() }).eq('id', id);
     loadAdminUsers();
   }
-
   async function adminDeleteUser(id, name) {
     if (!confirm(`Удалить профиль ${name}? (Аккаунт в auth останется)`)) return;
     await supabaseClient.from('profiles').delete().eq('id', id);
@@ -1491,13 +1518,8 @@
   async function loadAdminPrices() {
     const content = document.getElementById('adminContent');
     content.innerHTML = '<p style="color: var(--text2);">Загрузка...</p>';
-
     try {
-      const { data, error } = await supabaseClient
-        .from('settings')
-        .select('*')
-        .order('key');
-
+      const { data, error } = await supabaseClient.from('settings').select('*').order('key');
       if (error) throw error;
 
       const labels = {
